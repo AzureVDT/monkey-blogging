@@ -1,9 +1,18 @@
-import { Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/auth-context";
+import SignUpPage from "./pages/SignUpPage";
 
 const App = () => {
     return (
         <div>
-            <Routes></Routes>
+            <AuthProvider>
+                <Routes>
+                    <Route
+                        path="/sign-up"
+                        element={<SignUpPage></SignUpPage>}
+                    ></Route>
+                </Routes>
+            </AuthProvider>
         </div>
     );
 };
