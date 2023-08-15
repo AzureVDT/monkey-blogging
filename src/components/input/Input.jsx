@@ -38,7 +38,13 @@ const Input = ({ name = "", type = "text", children, control, ...props }) => {
     });
     return (
         <InputStyles>
-            <input type={type} id={name} {...props} {...field} />
+            <input
+                type={type}
+                id={name}
+                {...props}
+                {...field}
+                autoComplete="false"
+            />
             {children ? <div className="input-icon">{children}</div> : null}
         </InputStyles>
     );

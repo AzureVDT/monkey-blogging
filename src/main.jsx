@@ -9,6 +9,8 @@ import { BrowserRouter } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 const container = document.getElementById("root");
 const root = createRoot(container);
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 root.render(
     <React.StrictMode>
@@ -16,6 +18,7 @@ root.render(
             <GlobalStyles></GlobalStyles>
             <BrowserRouter>
                 <App />
+                <ToastContainer></ToastContainer>
             </BrowserRouter>
         </ThemeProvider>
     </React.StrictMode>
