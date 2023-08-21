@@ -9,10 +9,10 @@ import { Button } from "../components/button";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { IconEyeClose, IconEyeOpen } from "../components/icon";
 import { toast } from "react-toastify";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-app/firebase-config";
+import InputPasswordToggle from "../components/input/InputPasswordToggle";
 const schema = yup.object({
     email: yup
         .string()
@@ -31,9 +31,8 @@ const schema = yup.object({
         .required("Please enter your password"),
 });
 const SignInPage = () => {
-    const { userInfo, togglePassword, setTogglePassword } = useAuth();
+    const { userInfo } = useAuth();
     const navigate = useNavigate();
-    console.log("SignInPage ~ userInfo:", userInfo);
     useEffect(() => {
         document.title = "Login Page";
         if (userInfo?.email) navigate("/");
@@ -67,7 +66,7 @@ const SignInPage = () => {
             <form
                 className="form"
                 onSubmit={handleSubmit(handleSignIn)}
-                autoComplete="false"
+                autoComplete="off"
             >
                 <Field>
                     <Label htmlFor="email">Email address</Label>
@@ -80,37 +79,18 @@ const SignInPage = () => {
                 </Field>
                 <Field>
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                        name="password"
-                        type={togglePassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                    <InputPasswordToggle
                         control={control}
-                    >
-                        {togglePassword ? (
-                            <IconEyeOpen
-                                onClick={() => {
-                                    setTogglePassword(false);
-                                }}
-                            ></IconEyeOpen>
-                        ) : (
-                            <IconEyeClose
-                                onClick={() => {
-                                    setTogglePassword(true);
-                                }}
-                            ></IconEyeClose>
-                        )}
-                    </Input>
+                    ></InputPasswordToggle>
                 </Field>
                 <Button
                     type="submit"
-                    style={{
-                        maxWidth: 300,
-                        margin: "0 auto",
-                    }}
+                    className="w-full max-w-[300px] mx-auto"
                     isLoading={isSubmitting}
                     disabled={isSubmitting}
+                    kind="primary"
                 >
-                    Sign Up
+                    Sign In
                 </Button>
                 <div className="have-account">
                     <span>Not registered yet?</span>

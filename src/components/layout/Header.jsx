@@ -58,6 +58,7 @@ const HeaderStyles = styled.div`
         top: 50%;
         transform: translateY(-50%);
         right: 25px;
+        cursor: pointer;
     }
     .header-button {
         margin-left: 20px;
@@ -71,7 +72,6 @@ const HeaderStyles = styled.div`
 `;
 const Header = () => {
     const { userInfo } = useAuth();
-    console.log("Header ~ userInfo:", userInfo);
     return (
         <HeaderStyles>
             <div className="container">

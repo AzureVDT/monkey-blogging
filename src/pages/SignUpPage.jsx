@@ -3,7 +3,6 @@ import { Input } from "../components/input";
 import { useForm } from "react-hook-form";
 import { Field } from "../components/field";
 import React from "react";
-import { IconEyeClose, IconEyeOpen } from "../components/icon";
 import { Button } from "../components/button";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -13,7 +12,7 @@ import { auth, db } from "../firebase-app/firebase-config";
 import { NavLink, useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import AuthenticationPage from "./AuthenticationPage";
-import { useAuth } from "../context/auth-context";
+import InputPasswordToggle from "../components/input/InputPasswordToggle";
 const schema = yup.object({
     fullName: yup.string().required("Please enter your full name!"),
     email: yup
@@ -33,7 +32,6 @@ const schema = yup.object({
         .required("Please enter your password"),
 });
 const SignUpPage = () => {
-    const { togglePassword, setTogglePassword } = useAuth();
     const navigate = useNavigate();
     const {
         control,
@@ -97,33 +95,14 @@ const SignUpPage = () => {
                 </Field>
                 <Field>
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                        name="password"
-                        type={togglePassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                    <InputPasswordToggle
                         control={control}
-                    >
-                        {togglePassword ? (
-                            <IconEyeOpen
-                                onClick={() => {
-                                    setTogglePassword(false);
-                                }}
-                            ></IconEyeOpen>
-                        ) : (
-                            <IconEyeClose
-                                onClick={() => {
-                                    setTogglePassword(true);
-                                }}
-                            ></IconEyeClose>
-                        )}
-                    </Input>
+                    ></InputPasswordToggle>
                 </Field>
                 <Button
                     type="submit"
-                    style={{
-                        maxWidth: 300,
-                        margin: "0 auto",
-                    }}
+                    kind="primary"
+                    className="w-full max-w-[300px] mx-auto"
                     isLoading={isSubmitting}
                     disabled={isSubmitting}
                 >

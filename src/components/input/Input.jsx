@@ -43,7 +43,7 @@ const Input = ({ name = "", type = "text", children, control, ...props }) => {
                 id={name}
                 {...props}
                 {...field}
-                autoComplete="false"
+                autoComplete="off"
             />
             {children ? <div className="input-icon">{children}</div> : null}
         </InputStyles>

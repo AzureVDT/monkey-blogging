@@ -5,8 +5,7 @@ import { auth } from "../firebase-app/firebase-config";
 const AuthContext = createContext();
 function AuthProvider(props) {
     const [userInfo, setUserInfo] = useState({});
-    const [togglePassword, setTogglePassword] = useState(false);
-    const value = { userInfo, togglePassword, setUserInfo, setTogglePassword };
+    const value = { userInfo, setUserInfo };
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             setUserInfo(user);
