@@ -8,22 +8,23 @@ import { Radio } from "../../components/checkbox";
 import { Button } from "../../components/button";
 import slugify from "slugify";
 import { postStatus } from "../../utils/constants";
-import {
-    getStorage,
-    ref,
-    uploadBytesResumable,
-    getDownloadURL,
-} from "firebase/storage";
+import { ImageUpload } from "../../components/image";
+import useFirebaseImage from "../../hooks/useFirebaseImage";
+import Toggle from "../../components/toggle/Toggle";
+import { useEffect } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../firebase-app/firebase-config";
 const PostAddNewStyles = styled.div``;
 
 const PostAddNew = () => {
-    const { control, watch, setValue, handleSubmit } = useForm({
+    const { control, watch, setValue, handleSubmit, getValues } = useForm({
         mode: "onChange",
         defaultValues: {
             title: "",
             slug: "",
             status: 2,
             category: "",
+            hot: false,
         },
     });
     const addPostHandler = async (values) => {
@@ -33,47 +34,27 @@ const PostAddNew = () => {
         // handleUploadImage(cloneValue.image);
         console.log("addPostHandler ~ cloneValue:", cloneValue);
     };
-
-    const handleUploadImage = (file) => {
-        const storage = getStorage();
-        const storageRef = ref(storage, "images/" + file.name);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-        uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-                const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log("Upload is " + progress + "% done");
-                switch (snapshot.state) {
-                    case "paused":
-                        console.log("Upload is paused");
-                        break;
-                    case "running":
-                        console.log("Upload is running");
-                        break;
-                    default:
-                        console.log("Nothing at all");
-                }
-            },
-            (error) => {
-                console.log("handleUploadImage ~ error:", error);
-            },
-            () => {
-                // Upload completed successfully, now we can get the download URL
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    console.log("File available at", downloadURL);
-                });
-            }
-        );
-    };
-
-    const onSelectImage = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        setValue("image", file);
-    };
+    const { image, progress, handleSelectImage, handleDeleteImage } =
+        useFirebaseImage(setValue, getValues);
+    const watchHot = watch("hot");
     const watchStatus = watch("status");
-    const watchCategory = watch("category");
+    // const watchCategory = watch("category");
+    useEffect(() => {
+        async function getData() {
+            const colRef = collection(db, "categories");
+            const q = query(colRef, where("status", "==", 1));
+            const querySnapshot = await getDocs(q);
+            let result = [];
+            querySnapshot.forEach((doc) => {
+                console.log(doc.id, " => ", doc.data());
+                result.push({
+                    id: doc.id,
+                    ...doc.data(),
+                });
+            });
+        }
+        getData();
+    }, []);
     return (
         <PostAddNewStyles>
             <h1 className="dashboard-heading">Add new post</h1>
@@ -99,11 +80,24 @@ const PostAddNew = () => {
                 <div className="grid grid-cols-2 gap-x-10 mb-10">
                     <Field>
                         <Label htmlFor="image">Image</Label>
-                        <input
-                            type="file"
+                        <ImageUpload
                             name="image"
-                            onChange={onSelectImage}
-                        />
+                            onChange={handleSelectImage}
+                            progress={progress}
+                            image={image}
+                            className="h-[250px]"
+                            handleDeleteImage={handleDeleteImage}
+                        ></ImageUpload>
+                    </Field>
+                    <Field>
+                        <Label>Category</Label>
+                    </Field>
+                    <Field>
+                        <Label>Feature post</Label>
+                        <Toggle
+                            on={watchHot === true}
+                            onClick={() => setValue("hot", !watchHot)}
+                        ></Toggle>
                     </Field>
                     <Field>
                         <Label>Status</Label>
@@ -140,18 +134,18 @@ const PostAddNew = () => {
                             </Radio>
                         </div>
                     </Field>
-                    <Field>
+                    {/* <Field>
                         <Label htmlFor="author">Author</Label>
                         <Input
                             control={control}
                             placeholder="Find the author"
                             name="author"
                         ></Input>
-                    </Field>
+                    </Field> */}
                 </div>
                 <div className="grid grid-cols-2 gap-x-10 mb-10">
                     <Field>
-                        <Label>Category</Label>
+                        <Label>Feature post</Label>
                         <Dropdown>
                             <Dropdown.Option>Knowledge</Dropdown.Option>
                             <Dropdown.Option>Blockchain</Dropdown.Option>
