@@ -3,6 +3,8 @@ import styled from "styled-components";
 import DashboardHeader from "./DashboardHeader";
 import Sidebar from "./Sidebar";
 import PropTypes from "prop-types";
+import { useAuth } from "../../context/auth-context";
+import NotFoundPage from "../../pages/NotFoundPage";
 const DashboardStyles = styled.div`
     max-width: 1600px;
     margin: 0 auto;
@@ -24,6 +26,8 @@ const DashboardStyles = styled.div`
     }
 `;
 const DashboardLayout = ({ children }) => {
+    const { userInfo } = useAuth();
+    if (!userInfo) return <NotFoundPage></NotFoundPage>;
     return (
         <DashboardStyles>
             <DashboardHeader></DashboardHeader>

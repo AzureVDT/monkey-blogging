@@ -11,34 +11,45 @@ import { postStatus } from "../../utils/constants";
 import { ImageUpload } from "../../components/image";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
 import Toggle from "../../components/toggle/Toggle";
-import { useEffect } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
+import { useAuth } from "../../context/auth-context";
+import { toast } from "react-toastify";
 const PostAddNewStyles = styled.div``;
 
 const PostAddNew = () => {
+    const { userInfo } = useAuth();
     const { control, watch, setValue, handleSubmit, getValues } = useForm({
         mode: "onChange",
         defaultValues: {
             title: "",
             slug: "",
             status: 2,
-            category: "",
+            categoryId: "",
             hot: false,
         },
     });
-    const addPostHandler = async (values) => {
-        const cloneValue = { ...values };
-        cloneValue.slug = slugify(values.slug || values.title);
-        cloneValue.status = Number(values.status);
-        // handleUploadImage(cloneValue.image);
-        console.log("addPostHandler ~ cloneValue:", cloneValue);
-    };
     const { image, progress, handleSelectImage, handleDeleteImage } =
         useFirebaseImage(setValue, getValues);
+    const addPostHandler = async (values) => {
+        const cloneValue = { ...values };
+        cloneValue.slug = slugify(values.slug || values.title, { lower: true });
+        cloneValue.status = Number(values.status);
+        const colRef = collection(db, "posts");
+        await addDoc(colRef, {
+            ...cloneValue,
+            image,
+            userId: userInfo.uid,
+        });
+        toast.success("Create new post successfully");
+        console.log("addPostHandler ~ cloneValue:", cloneValue);
+    };
+
     const watchHot = watch("hot");
     const watchStatus = watch("status");
     // const watchCategory = watch("category");
+    const [categories, setCategories] = useState([]);
     useEffect(() => {
         async function getData() {
             const colRef = collection(db, "categories");
@@ -46,12 +57,12 @@ const PostAddNew = () => {
             const querySnapshot = await getDocs(q);
             let result = [];
             querySnapshot.forEach((doc) => {
-                console.log(doc.id, " => ", doc.data());
                 result.push({
                     id: doc.id,
                     ...doc.data(),
                 });
             });
+            setCategories(result);
         }
         getData();
     }, []);
@@ -91,6 +102,22 @@ const PostAddNew = () => {
                     </Field>
                     <Field>
                         <Label>Category</Label>
+                        <Dropdown>
+                            <Dropdown.Select></Dropdown.Select>
+                            <Dropdown.List>
+                                {categories.length > 0 &&
+                                    categories.map((item) => (
+                                        <Dropdown.Option
+                                            key={item.id}
+                                            onClick={() =>
+                                                setValue("categoryId", item.id)
+                                            }
+                                        >
+                                            {item.name}
+                                        </Dropdown.Option>
+                                    ))}
+                            </Dropdown.List>
+                        </Dropdown>
                     </Field>
                     <Field>
                         <Label>Feature post</Label>
@@ -146,13 +173,13 @@ const PostAddNew = () => {
                 <div className="grid grid-cols-2 gap-x-10 mb-10">
                     <Field>
                         <Label>Feature post</Label>
-                        <Dropdown>
+                        {/* <Dropdown>
                             <Dropdown.Option>Knowledge</Dropdown.Option>
                             <Dropdown.Option>Blockchain</Dropdown.Option>
                             <Dropdown.Option>Setup</Dropdown.Option>
                             <Dropdown.Option>Nature</Dropdown.Option>
                             <Dropdown.Option>Developer</Dropdown.Option>
-                        </Dropdown>
+                        </Dropdown> */}
                     </Field>
                     <Field></Field>
                 </div>
