@@ -10,6 +10,11 @@ import DashboardPage from "./pages/DashboardPage";
 import DashboardLayout from "./module/dashboard/DashboardLayout";
 import PostManage from "./module/post/PostManage";
 import PostAddNew from "./module/post/PostAddNew";
+import CategoryManage from "./module/category/CategoryManager";
+import CategoryAddNew from "./module/category/CategoryAddNew";
+import UserAddNew from "./module/user/UserAddNew";
+import UserManage from "./module/user/UserManager";
+import UserProfile from "./module/user/UserProfile";
 
 function App() {
     return (
@@ -40,12 +45,32 @@ function App() {
                             element={<DashboardPage></DashboardPage>}
                         ></Route>
                         <Route
-                            path="/manage/post"
+                            path="/manage/posts"
                             element={<PostManage></PostManage>}
                         ></Route>
                         <Route
                             path="/manage/add-post"
                             element={<PostAddNew></PostAddNew>}
+                        ></Route>
+                        <Route
+                            path="/manage/category"
+                            element={<CategoryManage></CategoryManage>}
+                        ></Route>
+                        <Route
+                            path="/manage/add-category"
+                            element={<CategoryAddNew></CategoryAddNew>}
+                        ></Route>
+                        <Route
+                            path="/manage/user"
+                            element={<UserManage></UserManage>}
+                        ></Route>
+                        <Route
+                            path="/manage/add-user"
+                            element={<UserAddNew></UserAddNew>}
+                        ></Route>
+                        <Route
+                            path="/profile"
+                            element={<UserProfile></UserProfile>}
                         ></Route>
                     </Route>
                 </Routes>

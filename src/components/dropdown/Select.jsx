@@ -1,6 +1,6 @@
 import { useDropdown } from "./dropdown-context";
 import PropTypes from "prop-types";
-const Select = ({ placeholder = "Please select an option" }) => {
+const Select = ({ placeholder = "Please select category" }) => {
     const { show, toggle: handleToggleDropdown } = useDropdown();
     return (
         <div

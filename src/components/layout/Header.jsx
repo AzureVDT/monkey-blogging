@@ -129,18 +129,25 @@ const Header = () => {
                     </div>
                     {!userInfo ? (
                         <Button
-                            type="submit"
-                            className="header-button"
+                            kind="primary"
+                            type="button"
                             height="56px"
-                            to="/sign-up"
+                            className="header-button"
+                            to="/sign-in"
                         >
-                            Sign Up
+                            Login
                         </Button>
                     ) : (
                         <div className="header-auth">
-                            <strong className="text-primary">
-                                {userInfo?.displayName}
-                            </strong>
+                            <Button
+                                kind="primary"
+                                type="button"
+                                height="56px"
+                                className="header-button"
+                                to="/dashboard"
+                            >
+                                Dashboard
+                            </Button>
                         </div>
                     )}
                 </div>

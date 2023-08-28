@@ -1,23 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body {
-    font-family: "Montserrat", sans-serif;
-    font-size: 16px;
-    color: #232323;
+@layer base {
+    body {
+        line-height: 1.5;
+        // -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        font-family: "Epilogue", sans-serif;
+        font-size: 16px;
+        color: #232323;
+    }
 }
-
 .container {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1260px;
     margin: 0 auto;
     padding: 0 20px;
 }
-
-.text-primary {
-    color: #2ebac1;
+a {
+    text-decoration: none;
+    color: inherit;
 }
-
+.text-primary {
+    color: #a4d96c;
+}
 .grid-layout {
     display: grid;
     grid-auto-columns: 235px;
@@ -29,7 +35,7 @@ body {
     }
     @media screen and (min-width: 1024px) {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 48px;
+        gap: 40px;
     }
     @media screen and (max-width: 1023.98px) {
         grid-auto-flow: column;
@@ -48,12 +54,11 @@ body {
     }
 }
 .home-block {
-    padding: 40px 0;
+    padding-bottom: 40px;
     @media screen and (min-width: 1024px) {
         padding-bottom: 60px;
     }
 }
-
 .entry-content {
     font-size: 16px;
     h2,
@@ -111,4 +116,7 @@ body {
     position: absolute;
     width: 1px;
     white-space: nowrap;
+}
+.form-layout {
+    @apply grid grid-cols-1 lg:grid-cols-2 lg:gap-x-10 mb-5 lg:mb-10;
 }

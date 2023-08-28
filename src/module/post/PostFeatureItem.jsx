@@ -3,6 +3,11 @@ import PostCategory from "./PostCategory";
 import PostTitle from "./PostTitle";
 import PostMeta from "./PostMeta";
 import PostImage from "./PostImage";
+import PropTypes from "prop-types";
+import React from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase-app/firebase-config";
+import slugify from "slugify";
 const PostFeatureItemStyles = styled.div`
     width: 100%;
     border-radius: 16px;
@@ -46,25 +51,60 @@ const PostFeatureItemStyles = styled.div`
         height: 272px;
     }
 `;
-const PostFeatureItem = () => {
+const PostFeatureItem = ({ data }) => {
+    const [category, setCategory] = React.useState([]);
+    const [user, setUser] = React.useState([]);
+    React.useEffect(() => {
+        async function fetch() {
+            const docRef = doc(db, "categories", data.categoryId);
+            const docSnap = await getDoc(docRef);
+            setCategory(docSnap.data());
+        }
+        fetch();
+    }, [data.categoryId]);
+    React.useEffect(() => {
+        async function fetchUser() {
+            if (data.userId) {
+                const docRef = doc(db, "users", data.userId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.data) {
+                    setUser(docSnap.data());
+                }
+            }
+        }
+        fetchUser();
+    }, [data.userId]);
+    if (!data || !data.id) return null;
+    const date = data?.createdAt?.seconds
+        ? new Date(data?.createdAt?.seconds * 1000)
+        : new Date();
+    const formatDate = new Date(date).toLocaleDateString("vi-VI");
     return (
         <PostFeatureItemStyles>
-            <PostImage
-                url="https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2662&q=80"
-                alt="unsplash"
-            ></PostImage>
+            <PostImage url={data.image} alt="unsplash"></PostImage>
             <div className="post-overlay"></div>
             <div className="post-content">
                 <div className="post-top">
-                    <PostCategory>Kiến thức</PostCategory>
-                    <PostMeta></PostMeta>
+                    {category?.name && (
+                        <PostCategory to={category.slug}>
+                            {category?.name}
+                        </PostCategory>
+                    )}
+                    <PostMeta
+                        to={slugify(user?.fullName || "")}
+                        authorName={user?.fullName}
+                        date={formatDate}
+                    ></PostMeta>
                 </div>
-                <PostTitle size="big">
-                    Hướng dẫn setup phòng cực chill dành cho người mới toàn tập
+                <PostTitle size="big" to={data.slug}>
+                    {data.title}
                 </PostTitle>
             </div>
         </PostFeatureItemStyles>
     );
+};
+PostFeatureItem.propTypes = {
+    data: PropTypes.object,
 };
 
 export default PostFeatureItem;
