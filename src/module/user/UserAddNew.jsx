@@ -13,10 +13,12 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase-app/firebase-config";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ImageUpload } from "../../components/image";
+import useFirebaseImage from "../../hooks/useFirebaseImage";
+import slugify from "slugify";
 const schema = yup.object({
     fullName: yup.string().required("Please enter your full name!"),
-    username: yup.string().required("Please enter your user name!"),
     email: yup
         .string()
         .email("Please enter valid email address")
@@ -37,7 +39,10 @@ const UserAddNew = () => {
     const {
         control,
         handleSubmit,
+        getValues,
+        setValue,
         watch,
+        reset,
         formState: { isSubmitting, isValid, errors },
     } = useForm({
         resolver: yupResolver(schema),
@@ -46,11 +51,19 @@ const UserAddNew = () => {
             username: "",
             email: "",
             password: "",
+            image: "",
             status: userStatus.PENDING,
             role: userRole.USER,
             createdAt: new Date(),
         },
     });
+    const {
+        image,
+        progress,
+        handleSelectImage,
+        handleDeleteImage,
+        handleResetUpload,
+    } = useFirebaseImage(setValue, getValues);
     const watchStatus = watch("status");
     const watchRole = watch("role");
     const handleAddNewUser = async (values) => {
@@ -58,16 +71,47 @@ const UserAddNew = () => {
         const cloneValues = { ...values };
         cloneValues.status = Number(values.status);
         cloneValues.role = Number(values.role);
-        await createUserWithEmailAndPassword(
-            auth,
-            cloneValues.email,
-            cloneValues.password
-        );
-        await setDoc(doc(db, "users", auth.currentUser.uid), {
-            createdAt: serverTimestamp,
-            ...cloneValues,
-        });
-        toast.success("Add new user successfully");
+        try {
+            await createUserWithEmailAndPassword(
+                auth,
+                cloneValues.email,
+                cloneValues.password
+            );
+            await addDoc(collection(db, "users"), {
+                fullName: cloneValues.fullName,
+                email: cloneValues.email,
+                password: cloneValues.password,
+                avatar: image,
+                createdAt: serverTimestamp(),
+                username: slugify(
+                    cloneValues.username || cloneValues.fullName,
+                    {
+                        lower: true,
+                        replacement: " ",
+                        trim: true,
+                    }
+                ),
+                status: userStatus.ACTIVE,
+                role: userRole.USER,
+            });
+            toast.success(
+                `Create new user with email: ${cloneValues.email} successfully!`
+            );
+            reset({
+                fullName: "",
+                username: "",
+                email: "",
+                password: "",
+                image: "",
+                status: userStatus.PENDING,
+                role: userRole.USER,
+                createdAt: new Date(),
+            });
+            handleResetUpload();
+        } catch (error) {
+            console.log(error);
+            toast.error("Can not create new user");
+        }
     };
     useEffect(() => {
         const arrayErrors = Object.values(errors);
@@ -85,6 +129,16 @@ const UserAddNew = () => {
                 desc="Add new user to system"
             ></DashboardHeading>
             <form onSubmit={handleSubmit(handleAddNewUser)}>
+                <div className="w-[200px] h-[200px] rounded-full mx-auto mb-10">
+                    <ImageUpload
+                        className="!rounded-full h-full"
+                        name="image"
+                        onChange={handleSelectImage}
+                        progress={progress}
+                        image={image}
+                        handleDeleteImage={handleDeleteImage}
+                    ></ImageUpload>
+                </div>
                 <div className="form-layout">
                     <Field>
                         <Label>Fullname</Label>

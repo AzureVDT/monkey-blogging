@@ -52,7 +52,11 @@ const SignUpPage = () => {
             fullName: values.fullName,
             email: values.email,
             password: values.password,
-            username: slugify(values.fullName, { lower: true }),
+            username: slugify(values.fullName, {
+                lower: true,
+                trim: true,
+                replacement: " ",
+            }),
             avatar: "https://images.unsplash.com/photo-1516834493344-d0832e78ce8d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
             status: userStatus.ACTIVE,
             role: userRole.USER,
