@@ -24,3 +24,15 @@ export const categoryStatus = {
     APPROVED: 1,
     UNAPPROVED: 2,
 };
+
+export const userStatus = {
+    ACTIVE: 1,
+    PENDING: 2,
+    BANNED: 3,
+};
+export const userRole = {
+    ADMIN: 1,
+    MODERATOR: 2,
+    EDITOR: 3,
+    USER: 4,
+};

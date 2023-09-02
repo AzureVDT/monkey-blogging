@@ -46,7 +46,6 @@ const CategoryAddNew = () => {
         } finally {
             reset({ name: "", slug: "", status: 1, createdAt: new Date() });
         }
-        console.log("handleAddNewCategory ~ newValues:", newValues);
     };
     const watchStatus = watch("status");
     return (
