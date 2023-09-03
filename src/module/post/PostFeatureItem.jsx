@@ -4,9 +4,6 @@ import PostTitle from "./PostTitle";
 import PostMeta from "./PostMeta";
 import PostImage from "./PostImage";
 import PropTypes from "prop-types";
-import React from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase-app/firebase-config";
 import slugify from "slugify";
 const PostFeatureItemStyles = styled.div`
     width: 100%;
@@ -52,28 +49,6 @@ const PostFeatureItemStyles = styled.div`
     }
 `;
 const PostFeatureItem = ({ data }) => {
-    const [category, setCategory] = React.useState([]);
-    const [user, setUser] = React.useState([]);
-    React.useEffect(() => {
-        async function fetch() {
-            const docRef = doc(db, "categories", data.categoryId);
-            const docSnap = await getDoc(docRef);
-            setCategory(docSnap.data());
-        }
-        fetch();
-    }, [data.categoryId]);
-    React.useEffect(() => {
-        async function fetchUser() {
-            if (data.userId) {
-                const docRef = doc(db, "users", data.userId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.data) {
-                    setUser(docSnap.data());
-                }
-            }
-        }
-        fetchUser();
-    }, [data.userId]);
     if (!data || !data.id) return null;
     const date = data?.createdAt?.seconds
         ? new Date(data?.createdAt?.seconds * 1000)
@@ -85,14 +60,14 @@ const PostFeatureItem = ({ data }) => {
             <div className="post-overlay"></div>
             <div className="post-content">
                 <div className="post-top">
-                    {category?.name && (
-                        <PostCategory to={category.slug}>
-                            {category?.name}
+                    {data.category?.name && (
+                        <PostCategory to={data.category.slug}>
+                            {data.category?.name}
                         </PostCategory>
                     )}
                     <PostMeta
-                        to={slugify(user?.fullName || "")}
-                        authorName={user?.fullName}
+                        to={slugify(data.user?.fullName || "")}
+                        authorName={data.user?.fullName}
                         date={formatDate}
                     ></PostMeta>
                 </div>

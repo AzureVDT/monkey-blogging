@@ -7,7 +7,12 @@ import {
 } from "firebase/storage";
 import React from "react";
 
-const useFirebaseImage = (setValue = () => {}, getValues = () => {}) => {
+const useFirebaseImage = (
+    setValue = () => {},
+    getValues = () => {},
+    imageName = null,
+    cb = null
+) => {
     const [progress, setProgress] = React.useState(0);
     const [image, setImage] = React.useState("");
     if (!setValue || !getValues) return;
@@ -52,7 +57,10 @@ const useFirebaseImage = (setValue = () => {}, getValues = () => {}) => {
     };
     const handleDeleteImage = () => {
         const storage = getStorage();
-        const imageRef = ref(storage, "images/" + getValues("image_name"));
+        const imageRef = ref(
+            storage,
+            "images/" + imageName || getValues("image_name")
+        );
 
         // Delete the file
         deleteObject(imageRef)
@@ -60,6 +68,7 @@ const useFirebaseImage = (setValue = () => {}, getValues = () => {}) => {
                 console.log("Remove image successfully");
                 setImage("");
                 setProgress(0);
+                cb && cb();
             })
             .catch((error) => {
                 console.log("handleDeleteImage ~ error:", error);

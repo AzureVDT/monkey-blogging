@@ -4,16 +4,25 @@ import { ActionDelete, ActionEdit } from "../../components/action";
 import { Table } from "../../components/table";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import {
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    where,
+} from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
-
+import { deleteUser } from "firebase/auth";
+import { debounce } from "lodash";
 const UserTable = () => {
     const [userList, setUserList] = useState([]);
     const navigate = useNavigate();
-    const handleDeleteUser = async (docId) => {
-        const colRef = doc(db, "users", docId);
+    const [filter, setFilter] = useState("");
+    const handleDeleteUser = async (user) => {
+        const colRef = doc(db, "users", user.id);
         Swal.fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
@@ -25,6 +34,7 @@ const UserTable = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await deleteDoc(colRef);
+                await deleteUser(user);
                 Swal.fire("Deleted!", "Your file has been deleted.", "success");
             }
         });
@@ -32,7 +42,14 @@ const UserTable = () => {
     useEffect(() => {
         async function fetchData() {
             const colRef = collection(db, "users");
-            onSnapshot(colRef, (snapshot) => {
+            const newRef = filter
+                ? query(
+                      colRef,
+                      where("fullName", ">=", filter),
+                      where("fullName", "<=", filter + "utf8")
+                  )
+                : colRef;
+            onSnapshot(newRef, (snapshot) => {
                 let results = [];
                 snapshot.forEach((user) => {
                     results.push({
@@ -44,7 +61,10 @@ const UserTable = () => {
             });
         }
         fetchData();
-    }, []);
+    }, [filter]);
+    const handleInputFilter = debounce((e) => {
+        setFilter(e.target.value);
+    }, 500);
     const renderLabelStatus = (status) => {
         switch (status) {
             case userStatus.ACTIVE:
@@ -75,6 +95,14 @@ const UserTable = () => {
     };
     return (
         <div>
+            <div className="mb-10 flex justify-end">
+                <input
+                    type="text"
+                    placeholder="Search user..."
+                    className="py-4 px-5 border border-gray-300 rounded-lg"
+                    onChange={handleInputFilter}
+                />
+            </div>
             <Table>
                 <thead>
                     <tr>
@@ -126,9 +154,7 @@ const UserTable = () => {
                                         }
                                     ></ActionEdit>
                                     <ActionDelete
-                                        onClick={() =>
-                                            handleDeleteUser(user.id)
-                                        }
+                                        onClick={() => handleDeleteUser(user)}
                                     ></ActionDelete>
                                 </div>
                             </td>

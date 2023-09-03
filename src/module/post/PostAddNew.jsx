@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import {
     addDoc,
     collection,
+    doc,
+    getDoc,
     getDocs,
     query,
     serverTimestamp,
@@ -34,9 +36,10 @@ const PostAddNew = () => {
                 title: "",
                 slug: "",
                 status: 2,
-                categoryId: "",
                 hot: false,
                 image: "",
+                category: {},
+                user: {},
             },
         });
     const {
@@ -71,7 +74,8 @@ const PostAddNew = () => {
                 title: "",
                 slug: "",
                 status: 2,
-                categoryId: "",
+                category: {},
+                user: {},
                 hot: false,
                 image: "",
             });
@@ -86,10 +90,26 @@ const PostAddNew = () => {
 
     const watchHot = watch("hot");
     const watchStatus = watch("status");
-    // const watchCategory = watch("category");
     const [categories, setCategories] = useState([]);
     const [selectCategory, setSelectCategory] = useState({});
     const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        async function fetchUserData() {
+            if (!userInfo.email) return;
+            const q = query(
+                collection(db, "users"),
+                where("email", "==", userInfo.email)
+            );
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) =>
+                setValue("user", {
+                    id: doc.id,
+                    ...doc.data(),
+                })
+            );
+        }
+        fetchUserData();
+    }, [setValue, userInfo.email]);
     useEffect(() => {
         async function getData() {
             const colRef = collection(db, "categories");
@@ -107,8 +127,13 @@ const PostAddNew = () => {
         getData();
     }, []);
 
-    const handleClickOption = (item) => {
-        setValue("categoryId", item.id);
+    const handleClickOption = async (item) => {
+        const colRef = doc(db, "categories", item.id);
+        const docData = await getDoc(colRef);
+        setValue("category", {
+            id: docData.id,
+            ...docData.data(),
+        });
         setSelectCategory(item);
     };
     useEffect(() => {
