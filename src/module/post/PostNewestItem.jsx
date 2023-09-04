@@ -3,6 +3,7 @@ import PostCategory from "./PostCategory";
 import PostTitle from "./PostTitle";
 import PostMeta from "./PostMeta";
 import PostImage from "./PostImage";
+import PropTypes from "prop-types";
 const PostNewestItemStyles = styled.div`
     display: flex;
     align-items: center;
@@ -31,23 +32,33 @@ const PostNewestItemStyles = styled.div`
         }
     }
 `;
-const PostNewestItem = () => {
+const PostNewestItem = ({ data }) => {
+    if (!data.id) return null;
     return (
         <PostNewestItemStyles>
             <PostImage
-                url="https://images.unsplash.com/photo-1510519138101-570d1dca3d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2294&q=80"
-                alt="unsplash"
-                to={`/`}
+                url={data?.image}
+                alt={data?.image_name}
+                to={data?.slug}
             ></PostImage>
             <div className="post-content">
-                <PostCategory type="secondary">Kiến thức</PostCategory>
-                <PostTitle>
-                    Hướng dẫn setup phòng cực chill dành cho người mới toàn tập
-                </PostTitle>
-                <PostMeta></PostMeta>
+                <PostCategory type="secondary" to={data?.category?.slug}>
+                    {data?.category?.name}
+                </PostCategory>
+                <PostTitle to={data?.slug}>{data?.title}</PostTitle>
+                <PostMeta
+                    date={new Date(
+                        data?.user?.createdAt?.seconds * 1000
+                    ).toLocaleDateString("vi-VI")}
+                    authorName={data?.user?.fullName}
+                    to={`${data?.user?.username}`}
+                ></PostMeta>
             </div>
         </PostNewestItemStyles>
     );
+};
+PostNewestItem.propTypes = {
+    data: PropTypes.object,
 };
 
 export default PostNewestItem;

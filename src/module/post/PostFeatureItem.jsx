@@ -66,7 +66,7 @@ const PostFeatureItem = ({ data }) => {
                         </PostCategory>
                     )}
                     <PostMeta
-                        to={slugify(data.user?.fullName || "")}
+                        to={slugify(data.user?.username || "")}
                         authorName={data.user?.fullName}
                         date={formatDate}
                     ></PostMeta>

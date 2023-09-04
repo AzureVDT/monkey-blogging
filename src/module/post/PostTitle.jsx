@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import PropTypes from "prop-types";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 const PostTitleStyles = styled.h3`
     font-weight: 600;
     line-height: 1.5;
@@ -20,10 +20,10 @@ const PostTitleStyles = styled.h3`
         `};
 `;
 
-const PostTitle = ({ children, className, size = "normal", to = "/" }) => {
+const PostTitle = ({ children, className, size = "normal", to = "" }) => {
     return (
         <PostTitleStyles className={`post-title ${className}`} size={size}>
-            <NavLink to={to}>{children}</NavLink>
+            <Link to={`/${to}`}>{children}</Link>
         </PostTitleStyles>
     );
 };

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 const PostImageStyles = styled.div`
     img {
         width: 100%;
@@ -10,10 +10,10 @@ const PostImageStyles = styled.div`
     }
 `;
 
-const PostImage = ({ className = "", url = "", alt = "", to = null }) => {
+const PostImage = ({ className = "", url = "", alt = "", to = "" }) => {
     if (to)
         return (
-            <NavLink to={to} style={{ display: "block" }}>
+            <Link to={`/${to}`} style={{ display: "block" }}>
                 <PostImageStyles className={`post-image ${className}`}>
                     <img
                         src={url}
@@ -22,7 +22,7 @@ const PostImage = ({ className = "", url = "", alt = "", to = null }) => {
                         loading="lazy"
                     />
                 </PostImageStyles>
-            </NavLink>
+            </Link>
         );
     return (
         <PostImageStyles className={`post-image ${className}`}>

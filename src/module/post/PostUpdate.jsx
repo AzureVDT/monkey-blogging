@@ -93,8 +93,11 @@ const PostUpdate = () => {
     const updatePostHandler = async (values) => {
         if (!isValid) return;
         const docRef = doc(db, "posts", postId);
+        values.status = Number(values.status);
+        values.role = Number(values.role);
         await updateDoc(docRef, {
             ...values,
+            image,
             content,
         });
         toast.success("Update post successfully");

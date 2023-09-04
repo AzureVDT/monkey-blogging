@@ -55,22 +55,7 @@ const PostManage = () => {
         fetchData();
     }, [filter]);
     const { userInfo } = useAuth();
-    const [user, setUser] = useState({});
-    useEffect(() => {
-        async function fetchUserData() {
-            if (!userInfo.email) return;
-            const q = query(
-                collection(db, "users"),
-                where("email", "==", userInfo.email)
-            );
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
-                setUser(doc.data());
-            });
-        }
-        fetchUserData();
-    }, [userInfo.email]);
-    if (user.role !== userRole.ADMIN) return null;
+    if (userInfo?.role !== userRole.ADMIN) return null;
     const handleDeletePost = async (postId) => {
         const colRef = doc(db, "posts", postId);
         Swal.fire({

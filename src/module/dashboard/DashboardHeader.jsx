@@ -1,6 +1,7 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { Button } from "../../components/button";
+import { useAuth } from "../../context/auth-context";
 const DashboardHeaderStyles = styled.div`
     background-color: white;
     padding: 20px;
@@ -36,6 +37,7 @@ const DashboardHeaderStyles = styled.div`
 `;
 
 const DashboardHeader = () => {
+    const { userInfo } = useAuth();
     return (
         <DashboardHeaderStyles>
             <NavLink to="/" className="logo">
@@ -54,12 +56,9 @@ const DashboardHeader = () => {
                 >
                     Write new post
                 </Button>
-                <NavLink to="/profile" className="header-avatar">
-                    <img
-                        src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3270&q=80"
-                        alt=""
-                    />
-                </NavLink>
+                <Link to="/profile" className="header-avatar">
+                    <img src={userInfo?.avatar} alt="" />
+                </Link>
             </div>
         </DashboardHeaderStyles>
     );

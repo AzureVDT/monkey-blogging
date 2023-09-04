@@ -26,21 +26,6 @@ const CATEGORY_PER_PAGE = 3;
 
 const CategoryManage = () => {
     const { userInfo } = useAuth();
-    const [user, setUser] = useState({});
-    useEffect(() => {
-        async function fetchUserData() {
-            if (!userInfo.email) return;
-            const q = query(
-                collection(db, "users"),
-                where("email", "==", userInfo.email)
-            );
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
-                setUser(doc.data());
-            });
-        }
-        fetchUserData();
-    }, [userInfo.email]);
     const [categoryList, setCategoryList] = useState([]);
     const navigate = useNavigate();
     const [filter, setFilter] = useState("");
@@ -73,7 +58,7 @@ const CategoryManage = () => {
         }
         fetchData();
     }, [filter]);
-    if (user.role !== userRole.ADMIN) return null;
+    if (userInfo?.role !== userRole.ADMIN) return null;
     const handleDeleteCategory = async (docId) => {
         const colRef = doc(db, "categories", docId);
         Swal.fire({
