@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase-app/firebase-config";
 import parse from "html-react-parser";
+import AuthorBox from "../components/author/AuthorBox";
 const PostDetailsPageStyles = styled.div`
     padding-bottom: 100px;
     .post {
@@ -143,19 +144,7 @@ const PostDetailsPage = () => {
                         <div className="entry-content">
                             {parse(postInfo?.content || "")}
                         </div>
-                        <div className="author">
-                            <div className="author-image">
-                                <img src={postInfo.user?.avatar} alt="" />
-                            </div>
-                            <div className="author-content">
-                                <h3 className="author-name">
-                                    {postInfo.user?.fullName}
-                                </h3>
-                                <p className="author-desc">
-                                    {postInfo.user?.description}
-                                </p>
-                            </div>
-                        </div>
+                        <AuthorBox userId={postInfo.user?.id}></AuthorBox>
                     </div>
                     <div className="post-related">
                         <Heading>Bài viết liên quan</Heading>

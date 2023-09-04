@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/button";
 import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
 import { LabelStatus } from "../../components/label";
-import { postStatus } from "../../utils/constants";
+import { postStatus, userRole } from "../../utils/constants";
+import { useAuth } from "../../context/auth-context";
 const POST_PER_PAGE = 3;
 const PostManage = () => {
     const [postList, setPostList] = useState([]);
@@ -53,6 +54,23 @@ const PostManage = () => {
         }
         fetchData();
     }, [filter]);
+    const { userInfo } = useAuth();
+    const [user, setUser] = useState({});
+    useEffect(() => {
+        async function fetchUserData() {
+            if (!userInfo.email) return;
+            const q = query(
+                collection(db, "users"),
+                where("email", "==", userInfo.email)
+            );
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                setUser(doc.data());
+            });
+        }
+        fetchUserData();
+    }, [userInfo.email]);
+    if (user.role !== userRole.ADMIN) return null;
     const handleDeletePost = async (postId) => {
         const colRef = doc(db, "posts", postId);
         Swal.fire({

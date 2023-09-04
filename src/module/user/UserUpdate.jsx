@@ -14,6 +14,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { db } from "../../firebase-app/firebase-config";
 import { toast } from "react-toastify";
+import { Textarea } from "../../components/textarea";
 
 const UserUpdate = () => {
     const [params] = useSearchParams();
@@ -37,6 +38,7 @@ const UserUpdate = () => {
             password: "",
             status: 2,
             role: 4,
+            description: "",
         },
     });
     useEffect(() => {
@@ -209,6 +211,15 @@ const UserUpdate = () => {
                         </FieldCheckboxes>
                     </Field>
                 </div>
+                <div className="form-layout">
+                    <Field>
+                        <Label>Description</Label>
+                        <Textarea
+                            name="description"
+                            control={control}
+                        ></Textarea>
+                    </Field>
+                </div>
                 <Button
                     kind="primary"
                     className="mx-auto w-[200px]"
@@ -216,7 +227,7 @@ const UserUpdate = () => {
                     isLoading={isSubmitting}
                     disabled={isSubmitting}
                 >
-                    Add new user
+                    Update user
                 </Button>
             </form>
         </div>
