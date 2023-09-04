@@ -168,7 +168,11 @@ const PostManage = () => {
                                 <td>{renderPostStatus(post.status)}</td>
                                 <td>
                                     <div className="flex items-center gap-x-3">
-                                        <ActionView></ActionView>
+                                        <ActionView
+                                            onClick={() =>
+                                                navigate(`/${post.slug}`)
+                                            }
+                                        ></ActionView>
                                         <ActionEdit
                                             onClick={() =>
                                                 navigate(

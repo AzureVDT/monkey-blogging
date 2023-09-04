@@ -11,7 +11,7 @@ import { postStatus } from "../../utils/constants";
 import { ImageUpload } from "../../components/image";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
 import Toggle from "../../components/toggle/Toggle";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     addDoc,
     collection,
@@ -25,8 +25,8 @@ import {
 import { db } from "../../firebase-app/firebase-config";
 import { useAuth } from "../../context/auth-context";
 import { toast } from "react-toastify";
+import ReactQuill from "react-quill";
 const PostAddNewStyles = styled.div``;
-
 const PostAddNew = () => {
     const { userInfo } = useAuth();
     const { control, watch, setValue, handleSubmit, getValues, reset } =
@@ -56,7 +56,7 @@ const PostAddNew = () => {
             cloneValue.slug = slugify(values.slug || values.title, {
                 replacement: "-",
                 remove: /[*+~.()'"!:@]/g,
-                lower: false,
+                lower: true,
                 strict: false,
                 locale: "en",
                 trim: true,
@@ -68,6 +68,7 @@ const PostAddNew = () => {
                 image,
                 userId: userInfo.uid,
                 createdAt: serverTimestamp(),
+                content,
             });
             toast.success("Create new post successfully");
             reset({
@@ -81,6 +82,7 @@ const PostAddNew = () => {
             });
             handleResetUpload();
             setSelectCategory({});
+            setContent("");
         } catch (error) {
             setLoading(false);
         } finally {
@@ -93,6 +95,7 @@ const PostAddNew = () => {
     const [categories, setCategories] = useState([]);
     const [selectCategory, setSelectCategory] = useState({});
     const [loading, setLoading] = useState(false);
+    const [content, setContent] = useState(false);
     useEffect(() => {
         async function fetchUserData() {
             if (!userInfo.email) return;
@@ -139,6 +142,19 @@ const PostAddNew = () => {
     useEffect(() => {
         document.title = "Monkey blogging - Add new post";
     }, []);
+    const modules = useMemo(
+        () => ({
+            toolbar: [
+                ["bold", "italic", "underline", "strike"],
+                ["blockquote"],
+                [{ header: 1 }, { header: 2 }], // custom button values
+                [{ list: "ordered" }, { list: "bullet" }],
+                [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                ["link", "image"],
+            ],
+        }),
+        []
+    );
     return (
         <PostAddNewStyles>
             <h1 className="dashboard-heading">Add new post</h1>
@@ -172,6 +188,7 @@ const PostAddNew = () => {
                             image={image}
                             className="h-[250px]"
                             handleDeleteImage={handleDeleteImage}
+                            required
                         ></ImageUpload>
                     </Field>
                     <Field>
@@ -198,6 +215,21 @@ const PostAddNew = () => {
                             </span>
                         )}
                     </Field>
+                </div>
+                <div className="mb-10">
+                    <Field>
+                        <Label>Content</Label>
+                        <div className="w-full entry-content">
+                            <ReactQuill
+                                theme="snow"
+                                value={content}
+                                onChange={setContent}
+                                modules={modules}
+                            />
+                        </div>
+                    </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-x-10 mb-10">
                     <Field>
                         <Label>Feature post</Label>
                         <Toggle
@@ -240,28 +272,8 @@ const PostAddNew = () => {
                             </Radio>
                         </div>
                     </Field>
-                    {/* <Field>
-                        <Label htmlFor="author">Author</Label>
-                        <Input
-                            control={control}
-                            placeholder="Find the author"
-                            name="author"
-                        ></Input>
-                    </Field> */}
                 </div>
-                <div className="grid grid-cols-2 gap-x-10 mb-10">
-                    <Field>
-                        <Label>Feature post</Label>
-                        {/* <Dropdown>
-                            <Dropdown.Option>Knowledge</Dropdown.Option>
-                            <Dropdown.Option>Blockchain</Dropdown.Option>
-                            <Dropdown.Option>Setup</Dropdown.Option>
-                            <Dropdown.Option>Nature</Dropdown.Option>
-                            <Dropdown.Option>Developer</Dropdown.Option>
-                        </Dropdown> */}
-                    </Field>
-                    <Field></Field>
-                </div>
+
                 <Button
                     type="submit"
                     kind="primary"
