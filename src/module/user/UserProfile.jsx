@@ -7,9 +7,8 @@ import DashboardHeading from "../dashboard/DashboardHeading";
 import { ImageUpload } from "../../components/image";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
 import InputPasswordToggle from "../../components/input/InputPasswordToggle";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase-app/firebase-config";
 import { toast } from "react-toastify";
 import { Textarea } from "../../components/textarea";
@@ -19,22 +18,11 @@ import * as yup from "yup";
 const schema = yup.object({
     fullName: yup.string().required("Please enter your full name!"),
     username: yup.string().required("Please enter your user name!"),
-    password: yup
-        .string()
-        .min(8, "Your password must be at least 8 character or greater")
-        .matches(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-            {
-                message:
-                    "Your password must have at least with one lowercase, uppercase, digit and special character",
-            }
-        )
-        .required("Please enter your password"),
 });
 const UserUpdate = () => {
     const { userInfo } = useAuth();
     const userId = userInfo.uid;
-    const navigate = useNavigate();
+    const [changePassword, setChangePassword] = useState(false);
     const {
         control,
         handleSubmit,
@@ -48,7 +36,10 @@ const UserUpdate = () => {
             image: "",
             fullName: "",
             username: "",
-            password: "",
+            birthday: "",
+            phone: "",
+            newPassword: "",
+            confirmPassword: "",
             description: "",
         },
         resolver: yupResolver(schema),
@@ -84,19 +75,59 @@ const UserUpdate = () => {
         useFirebaseImage(setValue, getValues, imageName, deleteAvatar);
     const handleUpdateUser = async (values) => {
         if (!isValid) return;
-        try {
-            const colRef = doc(db, "users", userId);
-            await updateDoc(colRef, {
-                ...values,
-                avatar: image,
-                role: userInfo.role,
-                status: userInfo.status,
-            });
-            toast.success("Update user information successfully!");
-            navigate("/manage/user");
-        } catch (error) {
-            console.log(error);
-            toast.error("Update user failed!");
+        if (!values.newPassword && !values.confirmPassword) {
+            try {
+                const colRef = doc(db, "users", userId);
+                await updateDoc(colRef, {
+                    avatar: image,
+                    role: userInfo.role,
+                    status: userInfo.status,
+                    description: values.description,
+                    phone: values.phone,
+                    birthday: values.birthday,
+                });
+                toast.success("Update user information successfully!");
+            } catch (error) {
+                console.log(error);
+                toast.error("Update user failed!");
+            }
+        } else if (values.newPassword) {
+            if (values.newPassword === values.password) {
+                toast.error("New password must be different to Old password!");
+                return;
+            }
+            if (values.newPassword !== values.confirmPassword) {
+                toast.error("Confirm password must be match new password!");
+                return;
+            }
+            if (values.newPassword === values.confirmPassword) {
+                const regex =
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                const newPassword = String(values.newPassword);
+                if (regex.test(newPassword)) {
+                    try {
+                        const colRef = doc(db, "users", userId);
+                        await updateDoc(colRef, {
+                            avatar: image,
+                            role: userInfo.role,
+                            status: userInfo.status,
+                            description: values.description,
+                            phone: values.description,
+                            birthday: values.birthday,
+                            password: values.newPassword,
+                        });
+                        toast.success("Update user information successfully!");
+                    } catch (error) {
+                        console.log(error);
+                        toast.error("Update user failed!");
+                    }
+                } else {
+                    toast.error(
+                        "Your password must have at least with one lowercase, uppercase, digit and special character!"
+                    );
+                    return;
+                }
+            }
         }
     };
     useEffect(() => {
@@ -105,7 +136,7 @@ const UserUpdate = () => {
     return (
         <div>
             <DashboardHeading
-                title="Update user"
+                title={`Profile Page`}
                 desc={`Update your user id: ${userId}`}
             ></DashboardHeading>
             <form onSubmit={handleSubmit(handleUpdateUser)}>
@@ -157,22 +188,53 @@ const UserUpdate = () => {
                 </div>
                 <div className="form-layout">
                     <Field>
-                        <Label>New Password</Label>
+                        <Label>Password</Label>
                         <InputPasswordToggle
                             control={control}
                             name="password"
-                            placeholder="Enter your password"
+                            disabled
                         ></InputPasswordToggle>
                     </Field>
-                    <Field>
-                        <Label>Confirm Password</Label>
-                        <InputPasswordToggle
-                            control={control}
-                            name="confirmPassword"
-                            placeholder="Enter your confirm password"
-                        ></InputPasswordToggle>
-                    </Field>
+                    <span
+                        className="mr-auto translate-y-1/3 cursor-pointer"
+                        onClick={() => setChangePassword(!changePassword)}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                            />
+                        </svg>
+                    </span>
                 </div>
+                {changePassword && (
+                    <div className="form-layout">
+                        <Field>
+                            <Label>New Password</Label>
+                            <InputPasswordToggle
+                                control={control}
+                                name="newPassword"
+                                placeholder="Enter your new password"
+                            ></InputPasswordToggle>
+                        </Field>
+                        <Field>
+                            <Label>Confirm Password</Label>
+                            <InputPasswordToggle
+                                control={control}
+                                name="confirmPassword"
+                                placeholder="Enter your confirm password"
+                            ></InputPasswordToggle>
+                        </Field>
+                    </div>
+                )}
                 <div className="form-layout">
                     <Field>
                         <Label>Description</Label>
