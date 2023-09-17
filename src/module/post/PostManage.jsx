@@ -22,6 +22,28 @@ import { postStatus, userRole } from "../../utils/constants";
 import { useAuth } from "../../context/auth-context";
 const POST_PER_PAGE = 3;
 const PostManage = () => {
+    const { userInfo } = useAuth();
+    console.log("PostManage ~ userInfo:", userInfo);
+    const [userPosts, setUserPosts] = useState([]);
+    useEffect(() => {
+        async function fetchData() {
+            const docRef = query(
+                collection(db, "posts"),
+                where("user.username", "==", userInfo.username)
+            );
+            onSnapshot(docRef, (snapshot) => {
+                const results = [];
+                snapshot.forEach((doc) => {
+                    results.push({
+                        id: doc.id,
+                        ...doc.data(),
+                    });
+                });
+                setUserPosts(results);
+            });
+        }
+        fetchData();
+    }, [userInfo.username]);
     const [postList, setPostList] = useState([]);
     const navigate = useNavigate();
     const [filter, setFilter] = useState("");
@@ -54,8 +76,6 @@ const PostManage = () => {
         }
         fetchData();
     }, [filter]);
-    const { userInfo } = useAuth();
-    if (userInfo?.role !== userRole.ADMIN) return null;
     const handleDeletePost = async (postId) => {
         const colRef = doc(db, "posts", postId);
         Swal.fire({
@@ -110,11 +130,11 @@ const PostManage = () => {
     return (
         <div>
             <h1 className="dashboard-heading">Manage post</h1>
-            <div className="mb-10 flex justify-end">
+            <div className="flex justify-end mb-10">
                 <div className="w-full max-w-[300px]">
                     <input
                         type="text"
-                        className="w-full p-4 rounded-lg border border-solid border-gray-300"
+                        className="w-full p-4 border border-gray-300 border-solid rounded-lg"
                         placeholder="Search post..."
                         onChange={handleInputFilter}
                     />
@@ -132,8 +152,70 @@ const PostManage = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {postList.length > 0 &&
+                    {userInfo.role === userRole.ADMIN &&
+                        postList.length > 0 &&
                         postList.map((post) => (
+                            <tr key={post.id}>
+                                <td title={post.id}>
+                                    {post.id.slice(0, 5) + "..."}
+                                </td>
+                                <td>
+                                    <div className="flex items-center gap-x-3">
+                                        <img
+                                            src={post?.image}
+                                            alt=""
+                                            className="w-[66px] h-[55px] rounded object-cover"
+                                        />
+                                        <div className="flex-1 whitespace-pre-wrap">
+                                            <h3 className="font-semibold max-w-[300px]">
+                                                {post?.title}
+                                            </h3>
+                                            <time className="text-sm text-gray-500">
+                                                {new Date(
+                                                    post?.user?.createdAt
+                                                        ?.seconds * 1000
+                                                ).toLocaleDateString("vi-VI")}
+                                            </time>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span className="text-gray-500">
+                                        {post?.category?.name}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span className="text-gray-500">
+                                        {post?.user?.fullName}
+                                    </span>
+                                </td>
+                                <td>{renderPostStatus(post.status)}</td>
+                                <td>
+                                    <div className="flex items-center gap-x-3">
+                                        <ActionView
+                                            onClick={() =>
+                                                navigate(`/${post.slug}`)
+                                            }
+                                        ></ActionView>
+                                        <ActionEdit
+                                            onClick={() =>
+                                                navigate(
+                                                    `/manage/update-post?id=${post.id}`
+                                                )
+                                            }
+                                        ></ActionEdit>
+                                        <ActionDelete
+                                            onClick={() =>
+                                                handleDeletePost(post.id)
+                                            }
+                                        ></ActionDelete>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    {userInfo.role !== userRole.ADMIN &&
+                        userPosts.length > 0 &&
+                        userPosts.map((post) => (
                             <tr key={post.id}>
                                 <td title={post.id}>
                                     {post.id.slice(0, 5) + "..."}
@@ -194,9 +276,6 @@ const PostManage = () => {
                         ))}
                 </tbody>
             </Table>
-            {/* <div className="mt-10">
-                <Pagination></Pagination>
-            </div> */}
 
             {total > postList.length && (
                 <div className="mt-10">

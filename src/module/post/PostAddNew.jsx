@@ -95,7 +95,7 @@ const PostAddNew = () => {
     const [categories, setCategories] = useState([]);
     const [selectCategory, setSelectCategory] = useState({});
     const [loading, setLoading] = useState(false);
-    const [content, setContent] = useState(false);
+    const [content, setContent] = useState("");
     useEffect(() => {
         async function fetchUserData() {
             if (!userInfo.email) return;

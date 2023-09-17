@@ -12,14 +12,16 @@ const AuthorBox = ({ userId = "" }) => {
         }
         fetchUserData();
     }, [userId]);
-    if (!userId || !userInfo.username) return null;
+    if (!userId || !userInfo?.username) return null;
     return (
         <div className="author">
-            <div className="author-image">
+            <div className="cursor-pointer author-image">
                 <img src={userInfo?.avatar} alt="" />
             </div>
             <div className="author-content">
-                <h3 className="author-name">{userInfo?.fullName}</h3>
+                <h3 className="cursor-pointer author-name">
+                    {userInfo?.fullName}
+                </h3>
                 <p className="author-desc">{userInfo?.description}</p>
             </div>
         </div>

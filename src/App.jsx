@@ -46,11 +46,6 @@ function App() {
                             path="/sign-in"
                             element={<SignInPage></SignInPage>}
                         ></Route>
-
-                        <Route
-                            path="*"
-                            element={<NotFoundPage></NotFoundPage>}
-                        ></Route>
                         <Route
                             path="/:slug"
                             element={<PostDetailsPage></PostDetailsPage>}
@@ -113,6 +108,10 @@ function App() {
                                 element={<UserProfile></UserProfile>}
                             ></Route>
                         </Route>
+                        <Route
+                            path="*"
+                            element={<NotFoundPage></NotFoundPage>}
+                        ></Route>
                     </Routes>
                 </Suspense>
             </AuthProvider>
